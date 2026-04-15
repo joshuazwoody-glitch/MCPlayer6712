@@ -47,17 +47,18 @@ async function useTotem(bot) {
 }
 
 async function smartDisengage(bot) {
-  console.log('[INSTINCT] Bad odds - disengaging and running!');
+  console.log('[INSTINCT] Bad odds - running away!');
   bot.chat('/rtp');
 }
 
-// Bot Setup
+// ==================== BOT SETUP ====================
 const bot = mineflayer.createBot({
   host: config.host,
   port: config.port,
   username: config.username,
   version: config.version,
-  auth: config.auth
+  auth: config.auth,
+  checkTimeoutInterval: 30000   // Helps with offline mode stability
 });
 
 bot.loadPlugin(pathfinder);
@@ -65,23 +66,29 @@ bot.loadPlugin(pvpPlugin);
 bot.loadPlugin(armorManager);
 
 bot.once('spawn', () => {
-  console.log('🚀 OFFLINE TEST MODE - God-Tier Bot Running Successfully');
+  console.log('🚀 OFFLINE TEST MODE - God-Tier Bot Successfully Spawned');
   const mcData = require('minecraft-data')(bot.version);
   bot.pathfinder.setMovements(new Movements(bot, mcData));
   loadMemory();
-  setTimeout(mainGodLoop, 5000);
+  setTimeout(mainGodLoop, 4000);
 });
 
-// Main Loop
+bot.on('end', (reason) => {
+  console.log(`Disconnected: ${reason}. This is normal in offline mode on Donut SMP.`);
+  // Do not auto-exit so Render keeps the process alive for logs
+});
+
+// ==================== MAIN LOOP ====================
 async function mainGodLoop() {
-  console.log('Starting decision loop with human instincts...');
+  console.log('✅ Smart decision loop started (offline test)');
 
   while (true) {
     const threat = calculateThreat(bot);
-    console.log(`[BRAIN] Threat: ${threat.toFixed(0)}% | Health: ${bot.health.toFixed(1)} | Ping: ${bot.ping || 0}ms`);
+    console.log(`[BRAIN] Threat: ${threat.toFixed(0)}% | Health: ${bot.health.toFixed(1)}`);
 
     await useTotem(bot);
 
+    // Combat instinct test
     const target = Object.values(bot.entities).find(e => 
       e.type === 'player' && e.username !== bot.username && bot.entity.position.distanceTo(e.position) < 40
     );
@@ -98,10 +105,10 @@ async function mainGodLoop() {
       }
     }
 
-    console.log('[MARKET] Scanning for AH flips...');
+    console.log('[MARKET] Simulating AH scan...');
     bot.chat('/ah');
 
-    await sleep(12000 + Math.random() * 8000);
+    await sleep(15000 + Math.random() * 10000);
   }
 }
 
@@ -117,13 +124,12 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // Anti-AFK
 setInterval(() => {
-  if (Math.random() < 0.4) {
+  if (Math.random() < 0.35) {
     bot.setControlState('jump', true);
     setTimeout(() => bot.setControlState('jump', false), 180 + Math.random() * 250);
   }
 }, 45000);
 
 bot.on('chat', (user, msg) => console.log(`[CHAT] ${user}: ${msg}`));
-bot.on('end', () => { console.log('Disconnected'); process.exit(0); });
 
 console.log('Offline test bot starting...');
