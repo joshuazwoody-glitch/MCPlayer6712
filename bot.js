@@ -2,7 +2,6 @@ const mineflayer = require('mineflayer');
 const { pathfinder, Movements } = require('mineflayer-pathfinder');
 const pvpPlugin = require('mineflayer-pvp').plugin;
 const armorManager = require('mineflayer-armor-manager');
-const { mineflayer: viewer } = require('prismarine-viewer');
 const Vec3 = require('vec3');
 
 const config = require('./config');
@@ -42,13 +41,13 @@ async function useTotem(bot) {
   if (bot.health > config.totemHealthThreshold) return;
   const totem = bot.inventory.items().find(i => i.name === 'totem_of_undying');
   if (!totem) return;
-  console.log('[TOTEM] Low health - using totem slowly (human-like)');
+  console.log('[TOTEM] Low health - using totem slowly');
   await bot.equip(totem, 'off-hand');
-  await sleep(420 + Math.random() * 520);
+  await sleep(450 + Math.random() * 550);
 }
 
 async function smartDisengage(bot) {
-  console.log('[INSTINCT] Bad fight odds - running away!');
+  console.log('[INSTINCT] Bad odds - disengaging and running!');
   bot.chat('/rtp');
 }
 
@@ -66,27 +65,23 @@ bot.loadPlugin(pvpPlugin);
 bot.loadPlugin(armorManager);
 
 bot.once('spawn', () => {
-  console.log('🚀 OFFLINE TEST MODE - God-Tier Bot Started');
-  try { viewer(bot, { port: config.viewerPort }); } catch(e) {}
-  
+  console.log('🚀 OFFLINE TEST MODE - God-Tier Bot Running Successfully');
   const mcData = require('minecraft-data')(bot.version);
   bot.pathfinder.setMovements(new Movements(bot, mcData));
-  
   loadMemory();
-  setTimeout(mainGodLoop, 6000);
+  setTimeout(mainGodLoop, 5000);
 });
 
-// Main Loop with Instincts
+// Main Loop
 async function mainGodLoop() {
-  console.log('Starting smart decision loop...');
+  console.log('Starting decision loop with human instincts...');
 
   while (true) {
     const threat = calculateThreat(bot);
-    console.log(`[BRAIN] Threat Level: ${threat.toFixed(0)}% | Health: ${bot.health.toFixed(1)} | Ping: ${bot.ping || 0}ms`);
+    console.log(`[BRAIN] Threat: ${threat.toFixed(0)}% | Health: ${bot.health.toFixed(1)} | Ping: ${bot.ping || 0}ms`);
 
     await useTotem(bot);
 
-    // Combat instinct
     const target = Object.values(bot.entities).find(e => 
       e.type === 'player' && e.username !== bot.username && bot.entity.position.distanceTo(e.position) < 40
     );
@@ -103,8 +98,7 @@ async function mainGodLoop() {
       }
     }
 
-    // Market test
-    console.log('[MARKET] Scanning AH for flips...');
+    console.log('[MARKET] Scanning for AH flips...');
     bot.chat('/ah');
 
     await sleep(12000 + Math.random() * 8000);
@@ -121,15 +115,15 @@ function calculateThreat(bot) {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// Human-like anti-AFK
+// Anti-AFK
 setInterval(() => {
-  if (Math.random() < 0.35) {
+  if (Math.random() < 0.4) {
     bot.setControlState('jump', true);
-    setTimeout(() => bot.setControlState('jump', false), 150 + Math.random() * 250);
+    setTimeout(() => bot.setControlState('jump', false), 180 + Math.random() * 250);
   }
 }, 45000);
 
 bot.on('chat', (user, msg) => console.log(`[CHAT] ${user}: ${msg}`));
-bot.on('end', () => { console.log('Bot disconnected'); process.exit(0); });
+bot.on('end', () => { console.log('Disconnected'); process.exit(0); });
 
 console.log('Offline test bot starting...');
