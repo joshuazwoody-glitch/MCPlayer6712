@@ -1,7 +1,7 @@
 module.exports = {
-  host: 'play.aternos.me',           // Reliable public server for offline testing
+  host: 'play.aternos.me',        // Public server that works with offline mode
   port: 25565,
-  username: 'GrokTestBot',           // You can change this name
+  username: 'GrokTestBot',        // Change this if you want
   version: '1.21',
   auth: 'offline',
 
