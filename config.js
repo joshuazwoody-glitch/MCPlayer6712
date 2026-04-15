@@ -1,7 +1,7 @@
 module.exports = {
-  host: 'donutsmp.net',
+  host: 'play.gemmc.net',           // A public server that allows offline mode
   port: 25565,
-  username: 'BotTest123',
+  username: 'GrokTestBot',          // Fake name
   version: '1.21',
   auth: 'offline',
 
